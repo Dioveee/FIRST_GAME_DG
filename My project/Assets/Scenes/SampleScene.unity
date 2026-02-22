@@ -1031,6 +1031,8 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  isGrounded: 0
+  objectCounterText: {fileID: 0}
 --- !u!95 &726957090
 Animator:
   serializedVersion: 7

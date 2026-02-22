@@ -1,20 +1,35 @@
-using System.Diagnostics;
-using System.Threading;
 using UnityEngine;
+using TMPro;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5f;
-    public float jumpForce = 5f; // Fuerza del salto
-    public float rayLength = 0.5f; // Longitud del rayo para detectar el suelo
-    public LayerMask groundLayer; // Capa del suelo para detecci�n
+    public float jumpForce = 5f;
+    public float rayLength = 0.7f;
+    public LayerMask groundLayer;
 
     private Rigidbody2D rb;
-    private bool isGrounded;
+    public bool isGrounded;
+    private Animator animator;
+    private bool facingRight = true;
+
+    public TextMeshProUGUI objectCounterText;
+
+    private Dictionary<string, int> collectedObjects = new Dictionary<string, int>()
+    {
+        { "Cake", 0 },
+        { "Chicken", 0 },
+        { "Coffee", 0 },
+        { "Jam", 0 },
+        { "Cookie", 0 }
+    };
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        UpdateObjectCounterUI();
     }
 
     void Update()
@@ -24,10 +39,33 @@ public class PlayerController : MonoBehaviour
 
         isGrounded = IsGrounded();
 
+        animator.SetBool("IsJumping", !isGrounded);
+        animator.SetFloat("VerticalVelocity", rb.linearVelocity.y);
+        animator.SetFloat("HorizontalVelocity", rb.linearVelocity.x);
+        animator.SetFloat("Speed", isGrounded ? Mathf.Abs(moveInput) : 0f);
+
+
         if (isGrounded && Input.GetButtonDown("Jump"))
             Jump();
+
+        if (moveInput > 0 && !facingRight)
+        {
+            Flip();
+        }
+        else if (moveInput < 0 && facingRight)
+        {
+            Flip();
+        }
+
     }
 
+    void Flip()
+    {
+        facingRight = !facingRight;
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
+    }
     void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
@@ -41,8 +79,32 @@ public class PlayerController : MonoBehaviour
         return hit.collider != null;
     }
 
-    void OnDrawGizmos()
+    void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.CompareTag("Collectible"))
+        {
+            string objectName = collision.gameObject.name;
+
+            if (collectedObjects.ContainsKey(objectName))
+            {
+                collectedObjects[objectName]++;
+                UpdateObjectCounterUI();
+            }
+            Destroy(collision.gameObject);
+        }
+    }
+
+    void UpdateObjectCounterUI()
+    {
+        objectCounterText.text = $"Cake: {collectedObjects["Cake"]} | " +
+                                 $"Chicken: {collectedObjects["Chicken"]} | " +
+                                 $"Coffee: {collectedObjects["Coffee"]} | " +
+                                 $"Jam: {collectedObjects["Jam"]} | " +
+                                 $"Cookie: {collectedObjects["Cookie"]}";
+    }
+
+    void OnDrawGizmos()
+    { 
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * rayLength);
     }
