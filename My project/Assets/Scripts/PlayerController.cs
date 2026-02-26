@@ -16,13 +16,11 @@ public class PlayerController : MonoBehaviour
 
     public TextMeshProUGUI objectCounterText;
 
-    private Dictionary<string, int> collectedObjects = new Dictionary<string, int>()
+   private Dictionary<string, int> collectedObjects = new Dictionary<string, int>()
     {
-        { "Cake", 0 },
-        { "Chicken", 0 },
-        { "Coffee", 0 },
-        { "Jam", 0 },
-        { "Cookie", 0 }
+        { "Escudo", 0 },
+        { "Diamante", 0 },
+        { "Moneda", 0 }
     };
 
     void Start()
@@ -79,29 +77,44 @@ public class PlayerController : MonoBehaviour
         return hit.collider != null;
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Collectible"))
-        {
-            string objectName = collision.gameObject.name;
+    
 
-            if (collectedObjects.ContainsKey(objectName))
-            {
-                collectedObjects[objectName]++;
-                UpdateObjectCounterUI();
-            }
-            Destroy(collision.gameObject);
-        }
+void OnTriggerEnter2D(Collider2D collision)
+{
+    if (!collision.CompareTag("Collectible"))
+        return;
+
+    string objectName = collision.gameObject.name;
+
+    Debug.Log("Nombre detectado: [" + objectName + "]");
+
+    foreach (var key in collectedObjects.Keys)
+    {
+        Debug.Log("Clave diccionario: [" + key + "]");
     }
 
-    void UpdateObjectCounterUI()
+    if (collectedObjects.ContainsKey(objectName))
     {
-        objectCounterText.text = $"Cake: {collectedObjects["Cake"]} | " +
-                                 $"Chicken: {collectedObjects["Chicken"]} | " +
-                                 $"Coffee: {collectedObjects["Coffee"]} | " +
-                                 $"Jam: {collectedObjects["Jam"]} | " +
-                                 $"Cookie: {collectedObjects["Cookie"]}";
+        collectedObjects[objectName]++;
+        Debug.Log("SÍ encontró la clave y sumó");
+        UpdateObjectCounterUI();
     }
+    else
+    {
+        Debug.Log("NO encontró la clave");
+    }
+
+    Destroy(collision.gameObject);
+}
+
+
+  void UpdateObjectCounterUI()
+    {
+        objectCounterText.text = $"Escudos: {collectedObjects["Escudo"]} | " +
+                                 $"Diamantes: {collectedObjects["Diamante"]} | " +
+                                 $"Monedas: {collectedObjects["Moneda"]}";
+    }
+
 
     void OnDrawGizmos()
     { 
