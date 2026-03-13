@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
@@ -115,6 +116,19 @@ void OnTriggerEnter2D(Collider2D collision)
                                  $"Monedas: {collectedObjects["Moneda"]}";
     }
 
+  void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log("¡Has muerto!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
     void OnDrawGizmos()
     { 
